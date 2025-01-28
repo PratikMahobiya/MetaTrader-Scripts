@@ -105,8 +105,8 @@ while True:
     data_frame['time']=pd.to_datetime(data_frame['time'], unit='s')
     
     now = data_frame['time'].iloc[-1]
-    print(f'{symbol}: Runtime: ', now)
     if last_minute != now.time().minute:
+        print(f'{symbol}: Runtime: ', now)
         print(f'Check: {symbol}')
         last_minute = now.time().minute
         data_frame = data_frame[:-1]
