@@ -3,7 +3,6 @@ import MetaTrader5 as mt5
 import pandas as pd
 import ta
 import pytz
-import time
 
 import ta.momentum
 
@@ -90,25 +89,28 @@ def SUPER_TREND(high, low, close, length, multiplier):
 
 # set time zone to UTC
 timezone = pytz.timezone("UTC")
-current_minute = datetime.now(tz=timezone).minute
+last_minute = 0
 
 while True:
-    now  = datetime.now(tz=timezone).replace(microsecond=0)
-    print(f'{symbol}: Runtime: ', now.time())
-    if current_minute != now.minute:
+    now  = datetime.now(tz=timezone)
+
+    # create 'datetime' object in UTC time zone to avoid the implementation of a local time zone offset
+    utc_from_date = now + timedelta(days=1)
+
+    data_1minute = mt5.copy_rates_from(symbol, mt5.TIMEFRAME_M1, utc_from_date, 1000)
+    
+    # create DataFrame out of the obtained data
+    data_frame = pd.DataFrame(data_1minute)
+    # convert time in seconds into the datetime format
+    data_frame['time']=pd.to_datetime(data_frame['time'], unit='s')
+    
+    now = data_frame['time'].iloc[-1]
+    print(f'{symbol}: Runtime: ', now)
+    if last_minute != now.time().minute:
         print(f'Check: {symbol}')
-        current_minute = now.minute
+        last_minute = now.time().minute
+        data_frame = data_frame[:-1]
 
-        # create 'datetime' object in UTC time zone to avoid the implementation of a local time zone offset
-        utc_from_date = now + timedelta(days=1)
-
-        data_1minute = mt5.copy_rates_from(symbol, mt5.TIMEFRAME_M1, utc_from_date, 1000)
-        
-        # create DataFrame out of the obtained data
-        data_frame = pd.DataFrame(data_1minute)
-        # convert time in seconds into the datetime format
-        data_frame['time']=pd.to_datetime(data_frame['time'], unit='s')
-        
         open = data_frame['open'].iloc[-1]
         high = data_frame['high'].iloc[-1]
         low = data_frame['low'].iloc[-1]
@@ -198,8 +200,6 @@ while True:
                             print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
             print("Order_send done, ", result)
             print("Opened position with POSITION_TICKET={}".format(result.order))
-    
-    time.sleep(1)
 
 # shut down connection to the MetaTrader 5 terminal
 mt5.shutdown()
