@@ -11,6 +11,7 @@ import ta.momentum
 symbol = "XAGUSDm"
 flag_entry = False
 flag_side = 'LONG' # By Defaulf
+point_diff_percent = 0.0006
 tr_percent = 0.0009
 sl_percent = 0.0009
 buy_price = 0
@@ -119,7 +120,7 @@ while True:
         rsi = ta.momentum.rsi(close=data_frame['close'], window=14)
         
 
-        if (close > super_trend.iloc[-1] and prev_close < super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < 0.02 ):
+        if (close > super_trend.iloc[-1] and prev_close < super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < data_frame['close'].iloc[-1]*point_diff_percent ):
             print(f'Long Order: {symbol}')
             flag_entry = True
             flag_side = 'LONG'
@@ -159,7 +160,7 @@ while True:
             print("Opened position with POSITION_TICKET={}".format(result.order))
         
 
-        elif (close < super_trend.iloc[-1] and prev_close > super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < 0.02 ):
+        elif (close < super_trend.iloc[-1] and prev_close > super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < data_frame['close'].iloc[-1]*point_diff_percent ):
             print(f'Short Order: {symbol}')
             flag_entry = True
             flag_side = 'SHORT'
