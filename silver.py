@@ -106,8 +106,7 @@ while True:
     
     now = data_frame['time'].iloc[-1]
     if last_minute != now.time().minute:
-        print(f'{symbol}: Runtime: ', now)
-        print(f'Check: {symbol}')
+        print(f'{symbol}: Runtime: {now} Check:')
         last_minute = now.time().minute
         data_frame = data_frame[:-1]
 
@@ -126,9 +125,9 @@ while True:
             print(f'Long Order: {symbol}')
             flag_entry = True
             flag_side = 'LONG'
-            target = close + close*tr_percent
-            stoploss = close - close*sl_percent
-            buy_price = close
+            buy_price = mt5.symbol_info_tick(symbol).ask
+            target = buy_price + buy_price*tr_percent
+            stoploss = buy_price - buy_price*sl_percent
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": symbol,
@@ -159,16 +158,16 @@ while True:
                         for tradereq_filed in traderequest_dict:
                             print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
             print("Order_send done, ", result)
-            print("Opened position with POSITION_TICKET={}".format(result.order))
+            print("Opened Long position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}".format(result.order, target, stoploss))
         
 
         elif (close < super_trend.iloc[-1] and prev_close > super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < data_frame['close'].iloc[-1]*point_diff_percent ):
             print(f'Short Order: {symbol}')
             flag_entry = True
             flag_side = 'SHORT'
-            target = close - close*tr_percent
-            stoploss = close + close*sl_percent
-            buy_price = close
+            buy_price = mt5.symbol_info_tick(symbol).ask
+            target = buy_price - buy_price*tr_percent
+            stoploss = buy_price + buy_price*sl_percent
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": symbol,
@@ -199,7 +198,7 @@ while True:
                         for tradereq_filed in traderequest_dict:
                             print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
             print("Order_send done, ", result)
-            print("Opened position with POSITION_TICKET={}".format(result.order))
+            print("Opened Short position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}".format(result.order, target, stoploss))
 
 # shut down connection to the MetaTrader 5 terminal
 mt5.shutdown()
