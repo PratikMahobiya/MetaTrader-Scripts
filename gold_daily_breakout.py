@@ -6,6 +6,7 @@ import pytz
 # Variables
 symbol = "XAUUSDm"
 lot = 1.0
+flag_side = 'Call' # By Default
 flag_magic = 0
 position_id = 0
 
@@ -23,6 +24,7 @@ for position in positions:
     if int(datetime.now().strftime("%d%m%Y")) == position['magic']:
         flag_magic = position['magic']
         position_id = position['ticket']
+        flag_side = 'Call' if 'Call' in position['comment'] else 'Put'
         print(f"Successfully fetched Open Position: Magic: {flag_magic}, Position ID: {position_id} ..")
         break
 
@@ -42,12 +44,12 @@ while True:
             "action": mt5.TRADE_ACTION_DEAL,
             "symbol": symbol,
             "volume": lot,
-            "type": mt5.ORDER_TYPE_SELL,
+            "type": mt5.ORDER_TYPE_SELL if flag_side == 'Put' else mt5.ORDER_TYPE_BUY,
             "position": position_id,
             "price": price,
             "deviation": 0,
             "magic": int(datetime.now().strftime("%d%m%Y")),
-            "comment": f"{symbol} Daily Breakout: Exit",
+            "comment": f"Exit : {flag_side} Daily Breakout",
             "type_time": mt5.ORDER_TIME_GTC,
             "type_filling": mt5.ORDER_FILLING_RETURN,
         }
@@ -108,7 +110,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": int(datetime.now().strftime("%d%m%Y")),
-                "comment": f"{symbol} Daily Breakout: Call",
+                "comment": "Call : Daily Breakout",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
@@ -148,7 +150,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": int(datetime.now().strftime("%d%m%Y")),
-                "comment": f"{symbol} Daily Breakout: Put",
+                "comment": "Put : Daily Breakout",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
