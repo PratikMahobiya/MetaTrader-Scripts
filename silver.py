@@ -158,7 +158,7 @@ while True:
                         for tradereq_filed in traderequest_dict:
                             print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
             print("Order_send done, ", result)
-            print("Opened Long position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}".format(result.order, target, stoploss))
+            print(f"Opened Long position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
         
 
         elif (close < super_trend.iloc[-1] and prev_close > super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < data_frame['close'].iloc[-1]*point_diff_percent ):
@@ -198,7 +198,7 @@ while True:
                         for tradereq_filed in traderequest_dict:
                             print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
             print("Order_send done, ", result)
-            print("Opened Short position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}".format(result.order, target, stoploss))
+            print(f"Opened Short position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
 
 # shut down connection to the MetaTrader 5 terminal
 mt5.shutdown()
