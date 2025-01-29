@@ -7,12 +7,12 @@ import pytz
 import ta.momentum
 
 # Variables
-symbol = "XAGUSDm"
+symbol = "ETHUSDm"
 flag_entry = False
 flag_side = 'LONG' # By Defaulf
-point_diff_percent = 0.0006
-tr_percent = 0.0009
-sl_percent = 0.0009
+point_diff_percent = 0.0007
+tr_percent = 0.0025
+sl_percent = 0.0025
 buy_price = 0
 stoploss = 0
 target = 0
