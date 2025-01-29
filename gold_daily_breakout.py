@@ -7,6 +7,7 @@ import pytz
 symbol = "XAUUSDm"
 lot = 1.0
 flag_side = 'Call' # By Default
+tr_percent = 0.02
 flag_magic = 0
 position_id = 0
 
@@ -51,7 +52,7 @@ while True:
             "magic": int(datetime.now().strftime("%d%m%Y")),
             "comment": f"Exit : {flag_side} Daily Breakout",
             "type_time": mt5.ORDER_TIME_GTC,
-            "type_filling": mt5.ORDER_FILLING_RETURN,
+            "type_filling": mt5.ORDER_FILLING_FOK,
         }
         # send a trading request
         result=mt5.order_send(request)
@@ -98,7 +99,7 @@ while True:
         if close > prev_high:
             print(f'Call Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
-            target = 0
+            target = buy_price + buy_price*tr_percent
             stoploss = prev_open
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
@@ -138,7 +139,7 @@ while True:
         elif close < prev_low:
             print(f'Put Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
-            target = 0
+            target = buy_price - buy_price*tr_percent
             stoploss = prev_open
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,

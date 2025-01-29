@@ -137,7 +137,7 @@ while True:
                     "magic": int(datetime.now().strftime("%d%m%Y")),
                     "comment": "SuperTrend: Put: Exit",
                     "type_time": mt5.ORDER_TIME_GTC,
-                    "type_filling": mt5.ORDER_FILLING_RETURN,
+                    "type_filling": mt5.ORDER_FILLING_FOK,
                 }
                 # send a trading request
                 result=mt5.order_send(request)
@@ -211,7 +211,7 @@ while True:
                     "magic": int(datetime.now().strftime("%d%m%Y")),
                     "comment": "SuperTrend: Call: Exit",
                     "type_time": mt5.ORDER_TIME_GTC,
-                    "type_filling": mt5.ORDER_FILLING_RETURN,
+                    "type_filling": mt5.ORDER_FILLING_FOK,
                 }
                 # send a trading request
                 result=mt5.order_send(request)
