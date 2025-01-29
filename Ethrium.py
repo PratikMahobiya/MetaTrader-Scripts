@@ -1,18 +1,16 @@
-from datetime import datetime, timedelta
-import MetaTrader5 as mt5
-import pandas as pd
-import ta
 import pytz
-from time import sleep
-
 import ta.momentum
+import pandas as pd
+from time import sleep
+import MetaTrader5 as mt5
+from datetime import datetime, timedelta
 
 # Variables
 symbol = "ETHUSDm"
 flag_entry = False
-point_diff_percent = 0.0007
-tr_percent = 0.0025
-sl_percent = 0.0025
+flag_side = 'Call' # By Default
+tr_percent = 0.002
+sl_percent = 0.002
 buy_price = 0
 stoploss = 0
 target = 0
@@ -122,7 +120,43 @@ while True:
         rsi = ta.momentum.rsi(close=data_frame['close'], window=14)
         
 
-        if (close > super_trend.iloc[-1] and prev_close < super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < data_frame['close'].iloc[-1]*point_diff_percent ):
+        if flag_entry:
+            if (flag_side == 'Call' and rsi.iloc[-1] > 60) or (flag_side == 'Put' and rsi.iloc[-1] < 40):
+                price=mt5.symbol_info_tick(symbol).bid
+                request={
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": lot,
+                    "type": mt5.ORDER_TYPE_SELL if flag_side == 'Put' else mt5.ORDER_TYPE_BUY,
+                    "position": position_id,
+                    "price": price,
+                    "deviation": 0,
+                    "magic": int(datetime.now().strftime("%d%m%Y")),
+                    "comment": f"Exit : {flag_side} Daily Breakout",
+                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_filling": mt5.ORDER_FILLING_FOK,
+                }
+                # send a trading request
+                result=mt5.order_send(request)
+                # check the execution result
+                if result.retcode != mt5.TRADE_RETCODE_DONE:
+                    print("Order_send failed, retcode={}".format(result.retcode))
+                    # request the result as a dictionary and display it element by element
+                    result_dict=result._asdict()
+                    for field in result_dict.keys():
+                        print("   {}={}".format(field,result_dict[field]))
+                        # if this is a trading request structure, display it element by element as well
+                        if field=="request":
+                            traderequest_dict=result_dict[field]._asdict()
+                            for tradereq_filed in traderequest_dict:
+                                print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
+                print("Order_send done, ", result)
+                print(f"Exit Opened position with POSITION_TICKET={result.order}")
+                position_id = 0
+                flag_entry = False
+
+
+        elif flag_entry == False and rsi.iloc[-1] > 30 and rsi.iloc[-2] < 30 and rsi.iloc[-3] > 30:
             print(f'Call Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
@@ -193,10 +227,11 @@ while True:
             print("Order_send done, ", result)
             print(f"Opened Call position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             flag_entry = True
+            flag_side = 'Call'
             position_id = result.order
         
 
-        elif (close < super_trend.iloc[-1] and prev_close > super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < data_frame['close'].iloc[-1]*point_diff_percent ):
+        elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70 and rsi.iloc[-3] < 70:
             print(f'Put Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
@@ -267,4 +302,5 @@ while True:
             print("Order_send done, ", result)
             print(f"Opened Put position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             flag_entry = True
+            flag_side = 'Put'
             position_id = result.order
