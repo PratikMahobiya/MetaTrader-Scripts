@@ -3,13 +3,13 @@ import MetaTrader5 as mt5
 import pandas as pd
 import ta
 import pytz
+from time import sleep
 
 import ta.momentum
 
 # Variables
 symbol = "XAUUSDm"
 flag_entry = False
-flag_side = 'LONG' # By Defaulf
 point_diff_percent = 0.0006
 tr_percent = 0.0009
 sl_percent = 0.0009
@@ -17,6 +17,7 @@ buy_price = 0
 stoploss = 0
 target = 0
 lot = 1.0
+position_id = 0
 
 # establish connection to MetaTrader 5 terminal
 if not mt5.initialize():
@@ -122,9 +123,41 @@ while True:
         
 
         if (close > super_trend.iloc[-1] and prev_close < super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < data_frame['close'].iloc[-1]*point_diff_percent ):
-            print(f'Long Order: {symbol}')
-            flag_entry = True
-            flag_side = 'LONG'
+            print(f'Call Order: {symbol}')
+            if position_id != 0:
+                price=mt5.symbol_info_tick(symbol).bid
+                request={
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": lot,
+                    "type": mt5.ORDER_TYPE_SELL,
+                    "position": position_id,
+                    "price": price,
+                    "deviation": 0,
+                    "magic": int(datetime.now().strftime("%d%m%Y")),
+                    "comment": "SuperTrend: Put: Exit",
+                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_filling": mt5.ORDER_FILLING_RETURN,
+                }
+                # send a trading request
+                result=mt5.order_send(request)
+                # check the execution result
+                if result.retcode != mt5.TRADE_RETCODE_DONE:
+                    print("Order_send failed, retcode={}".format(result.retcode))
+                    # request the result as a dictionary and display it element by element
+                    result_dict=result._asdict()
+                    for field in result_dict.keys():
+                        print("   {}={}".format(field,result_dict[field]))
+                        # if this is a trading request structure, display it element by element as well
+                        if field=="request":
+                            traderequest_dict=result_dict[field]._asdict()
+                            for tradereq_filed in traderequest_dict:
+                                print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
+                print("Order_send done, ", result)
+                print(f"Exit Opened position with POSITION_TICKET={result.order}")
+                position_id = 0
+                flag_entry = False
+                sleep(1)
             buy_price = mt5.symbol_info_tick(symbol).ask
             target = buy_price + buy_price*tr_percent
             stoploss = buy_price - buy_price*sl_percent
@@ -138,7 +171,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": 0,
-                "comment": "python script: Long",
+                "comment": "SuperTrend: Call: Open",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
@@ -158,13 +191,47 @@ while True:
                         for tradereq_filed in traderequest_dict:
                             print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
             print("Order_send done, ", result)
-            print(f"Opened Long position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
+            print(f"Opened Call position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
+            flag_entry = True
+            position_id = result.order
         
 
         elif (close < super_trend.iloc[-1] and prev_close > super_trend.iloc[-2]) and ( abs(data_frame['close'].iloc[-2] - data_frame['close'].iloc[-1]) < data_frame['close'].iloc[-1]*point_diff_percent ):
-            print(f'Short Order: {symbol}')
-            flag_entry = True
-            flag_side = 'SHORT'
+            print(f'Put Order: {symbol}')
+            if position_id != 0:
+                price=mt5.symbol_info_tick(symbol).bid
+                request={
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": lot,
+                    "type": mt5.ORDER_TYPE_BUY,
+                    "position": position_id,
+                    "price": price,
+                    "deviation": 0,
+                    "magic": int(datetime.now().strftime("%d%m%Y")),
+                    "comment": "SuperTrend: Call: Exit",
+                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_filling": mt5.ORDER_FILLING_RETURN,
+                }
+                # send a trading request
+                result=mt5.order_send(request)
+                # check the execution result
+                if result.retcode != mt5.TRADE_RETCODE_DONE:
+                    print("Order_send failed, retcode={}".format(result.retcode))
+                    # request the result as a dictionary and display it element by element
+                    result_dict=result._asdict()
+                    for field in result_dict.keys():
+                        print("   {}={}".format(field,result_dict[field]))
+                        # if this is a trading request structure, display it element by element as well
+                        if field=="request":
+                            traderequest_dict=result_dict[field]._asdict()
+                            for tradereq_filed in traderequest_dict:
+                                print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
+                print("Order_send done, ", result)
+                print(f"Exit Opened position with POSITION_TICKET={result.order}")
+                position_id = 0
+                flag_entry = False
+                sleep(1)
             buy_price = mt5.symbol_info_tick(symbol).ask
             target = buy_price - buy_price*tr_percent
             stoploss = buy_price + buy_price*sl_percent
@@ -178,7 +245,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": 0,
-                "comment": "python script: Short",
+                "comment": "SuperTrend: Put: Open",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
@@ -198,8 +265,6 @@ while True:
                         for tradereq_filed in traderequest_dict:
                             print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
             print("Order_send done, ", result)
-            print(f"Opened Short position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
-
-# shut down connection to the MetaTrader 5 terminal
-mt5.shutdown()
-
+            print(f"Opened Put position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
+            flag_entry = True
+            position_id = result.order
