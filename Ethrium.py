@@ -127,12 +127,12 @@ while True:
                     "action": mt5.TRADE_ACTION_DEAL,
                     "symbol": symbol,
                     "volume": lot,
-                    "type": mt5.ORDER_TYPE_SELL if flag_side == 'Put' else mt5.ORDER_TYPE_BUY,
+                    "type": mt5.ORDER_TYPE_SELL if flag_side == 'Call' else mt5.ORDER_TYPE_BUY,
                     "position": position_id,
                     "price": price,
                     "deviation": 0,
                     "magic": int(datetime.now().strftime("%d%m%Y")),
-                    "comment": f"Exit : {flag_side} Daily Breakout",
+                    "comment": f"Min_BrkOut: {flag_side}: Exit",
                     "type_time": mt5.ORDER_TIME_GTC,
                     "type_filling": mt5.ORDER_FILLING_FOK,
                 }
@@ -157,19 +157,19 @@ while True:
 
 
         elif flag_entry == False and rsi.iloc[-1] > 30 and rsi.iloc[-2] < 30 and rsi.iloc[-3] > 30:
-            print(f'Call Order: {symbol}')
+            print(f'{flag_side} Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
                 request={
                     "action": mt5.TRADE_ACTION_DEAL,
                     "symbol": symbol,
                     "volume": lot,
-                    "type": mt5.ORDER_TYPE_SELL,
+                    "type": mt5.ORDER_TYPE_SELL if flag_side == 'Call' else mt5.ORDER_TYPE_BUY,
                     "position": position_id,
                     "price": price,
                     "deviation": 0,
                     "magic": int(datetime.now().strftime("%d%m%Y")),
-                    "comment": "SuperTrend: Put: Exit",
+                    "comment": f"Min_BrkOut: {flag_side}: Exit",
                     "type_time": mt5.ORDER_TIME_GTC,
                     "type_filling": mt5.ORDER_FILLING_FOK,
                 }
@@ -205,7 +205,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": 0,
-                "comment": "SuperTrend: Call: Open",
+                "comment": "Min_BrkOut: Call: Open",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
@@ -232,19 +232,19 @@ while True:
         
 
         elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70 and rsi.iloc[-3] < 70:
-            print(f'Put Order: {symbol}')
+            print(f'{flag_side} Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
                 request={
                     "action": mt5.TRADE_ACTION_DEAL,
                     "symbol": symbol,
                     "volume": lot,
-                    "type": mt5.ORDER_TYPE_BUY,
+                    "type": mt5.ORDER_TYPE_SELL if flag_side == 'Call' else mt5.ORDER_TYPE_BUY,
                     "position": position_id,
                     "price": price,
                     "deviation": 0,
                     "magic": int(datetime.now().strftime("%d%m%Y")),
-                    "comment": "SuperTrend: Call: Exit",
+                    "comment": f"Min_BrkOut: {flag_side}: Exit",
                     "type_time": mt5.ORDER_TIME_GTC,
                     "type_filling": mt5.ORDER_FILLING_FOK,
                 }
@@ -280,7 +280,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": 0,
-                "comment": "SuperTrend: Put: Open",
+                "comment": "Min_BrkOut: Put: Open",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
