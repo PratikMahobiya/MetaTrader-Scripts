@@ -4,7 +4,7 @@ import pandas as pd
 import pytz
 
 # Variables
-symbol = "XCUUSDm"
+symbol = "USOILm"
 lot = 1.0
 flag_side = 'Call' # By Default
 tr_percent = 0.02

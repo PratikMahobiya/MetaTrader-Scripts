@@ -141,7 +141,7 @@ while True:
         
 
         if flag_entry:
-            if (flag_side == 'Call' and rsi.iloc[-1] > 60) or (flag_side == 'Put' and rsi.iloc[-1] < 40):
+            if (flag_side == 'Call' and rsi.iloc[-2] > 60 and rsi.iloc[-2] > rsi.iloc[-1]) or (flag_side == 'Put' and rsi.iloc[-2] < 40 and rsi.iloc[-2] < rsi.iloc[-1]):
                 price=mt5.symbol_info_tick(symbol).bid
                 request={
                     "action": mt5.TRADE_ACTION_DEAL,
@@ -176,8 +176,8 @@ while True:
                 flag_entry = False
 
 
-        elif flag_entry == False and rsi.iloc[-1] > 30 and rsi.iloc[-2] < 30 and rsi.iloc[-3] > 30:
-            print(f'{flag_side} Order: {symbol}')
+        elif flag_entry == False and rsi.iloc[-1] > 30 and rsi.iloc[-2] < 30:# and rsi.iloc[-3] > 30:
+            print(f'Call Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
                 request={
@@ -251,8 +251,8 @@ while True:
             position_id = result.order
         
 
-        elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70 and rsi.iloc[-3] < 70:
-            print(f'{flag_side} Order: {symbol}')
+        elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70:# and rsi.iloc[-3] < 70:
+            print(f'Put Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
                 request={
