@@ -23,6 +23,26 @@ if not mt5.initialize():
     quit()
 
 
+# get open positions on XCUUSDm
+print(f"Trying to fetch Min_Breakout Open Position for {symbol}..")
+positions=mt5.positions_get(symbol=symbol)
+for position in positions:
+    position = position._asdict()
+    if 'Min_BrkOut: Call: Open' == position['comment']:
+        position_id = position['ticket']
+        flag_side = 'Call'
+        print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
+        break
+    elif 'Min_BrkOut: Put: Open' == position['comment']:
+        position_id = position['ticket']
+        flag_side = 'Put'
+        print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
+        break
+
+if position_id == 0:
+    print(f"No Open Position Found..")
+
+
 def SUPER_TREND(high, low, close, length, multiplier):
     # ATR
     
