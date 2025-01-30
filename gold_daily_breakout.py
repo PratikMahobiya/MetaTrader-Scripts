@@ -177,7 +177,7 @@ while True:
             position_id = result.order
             flag_side = 'Put'
     elif position_id != 0:
-        if close >= target or close <= stoploss:
+        if high >= target or low <= stoploss:
             position_id = 0
             target = 0
             stoploss = 0

@@ -141,7 +141,7 @@ while True:
         
 
         if flag_entry:
-            if close >= target or close <= stoploss:
+            if high >= target or low <= stoploss:
                 position_id = 0
                 flag_entry = False
                 target = 0
