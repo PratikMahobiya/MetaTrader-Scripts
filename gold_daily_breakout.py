@@ -176,8 +176,3 @@ while True:
             print(f"Opened Put position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             position_id = result.order
             flag_side = 'Put'
-    elif position_id != 0:
-        if high >= target or low <= stoploss:
-            position_id = 0
-            target = 0
-            stoploss = 0
