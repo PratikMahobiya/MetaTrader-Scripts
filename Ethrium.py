@@ -28,12 +28,12 @@ print(f"Trying to fetch Min_Breakout Open Position for {symbol}..")
 positions=mt5.positions_get(symbol=symbol)
 for position in positions:
     position = position._asdict()
-    if 'Min_BrkOut: Call: Open' == position['comment']:
+    if 'Call_Minute' == position['comment']:
         position_id = position['ticket']
         flag_side = 'Call'
         print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
         break
-    elif 'Min_BrkOut: Put: Open' == position['comment']:
+    elif 'Put_Minute' == position['comment']:
         position_id = position['ticket']
         flag_side = 'Put'
         print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
@@ -225,7 +225,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": 0,
-                "comment": "Min_BrkOut: Call: Open",
+                "comment": "Call_Minute",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
@@ -300,7 +300,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": 0,
-                "comment": "Min_BrkOut: Put: Open",
+                "comment": "Put_Minute",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }

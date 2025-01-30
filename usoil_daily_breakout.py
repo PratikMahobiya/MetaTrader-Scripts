@@ -21,12 +21,12 @@ print(f"Trying to fetch Breakout Open Position for {symbol}..")
 positions=mt5.positions_get(symbol=symbol)
 for position in positions:
     position = position._asdict()
-    if "Call: Daily Breakout" == position['comment']:
+    if "Call_Daily" == position['comment']:
         position_id = position['ticket']
         flag_side = 'Call'
         print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
         break
-    elif "Put: Daily Breakout" == position['comment']:
+    elif "Put_Daily" == position['comment']:
         position_id = position['ticket']
         flag_side = 'Put'
         print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
@@ -113,7 +113,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": int(datetime.now().strftime("%d%m%Y")),
-                "comment": "Call: Daily Breakout",
+                "comment": "Call_Daily",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
@@ -152,7 +152,7 @@ while True:
                 "tp": target,
                 "deviation": 0,
                 "magic": int(datetime.now().strftime("%d%m%Y")),
-                "comment": "Put: Daily Breakout",
+                "comment": "Put_Daily",
                 "type_time": mt5.ORDER_TIME_DAY,
                 "type_filling": mt5.ORDER_FILLING_FOK,
             }
