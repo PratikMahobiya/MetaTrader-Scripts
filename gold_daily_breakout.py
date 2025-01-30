@@ -135,6 +135,7 @@ while True:
             print("Order_send done, ", result)
             print(f"Opened Call position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             position_id = result.order
+            flag_side = 'Call'
         
 
         elif close < prev_low:
@@ -174,5 +175,6 @@ while True:
             print("Order_send done, ", result)
             print(f"Opened Put position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             position_id = result.order
+            flag_side = 'Put'
     else:
         pass
