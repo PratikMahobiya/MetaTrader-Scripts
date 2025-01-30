@@ -176,7 +176,7 @@ while True:
                 flag_entry = False
 
 
-        elif flag_entry == False and rsi.iloc[-1] > 30 and rsi.iloc[-2] < 30:# and rsi.iloc[-3] > 30:
+        elif flag_entry == False and rsi.iloc[-1] > 30 and rsi.iloc[-2] < 30 and rsi.iloc[-3] > 30:
             print(f'Call Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
@@ -251,7 +251,7 @@ while True:
             position_id = result.order
         
 
-        elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70:# and rsi.iloc[-3] < 70:
+        elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70 and rsi.iloc[-3] < 70:
             print(f'Put Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
