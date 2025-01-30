@@ -31,11 +31,17 @@ for position in positions:
     if 'Call_Minute' == position['comment']:
         position_id = position['ticket']
         flag_side = 'Call'
+        flag_entry = True
+        target = position['tp']
+        stoploss = position['sl']
         print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
         break
     elif 'Put_Minute' == position['comment']:
         position_id = position['ticket']
         flag_side = 'Put'
+        flag_entry = True
+        target = position['sl']
+        stoploss = position['tp']
         print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
         break
 
@@ -125,7 +131,6 @@ while True:
     
     now = data_frame['time'].iloc[-1]
     if last_minute != now.time().minute:
-        print(f'{symbol}: Runtime: {now} Check:')
         last_minute = now.time().minute
         data_frame = data_frame[:-1]
 
@@ -139,6 +144,7 @@ while True:
         super_trend = SUPER_TREND(high=data_frame['high'], low=data_frame['low'], close=data_frame['close'], length=10, multiplier=3)
         rsi = ta.momentum.rsi(close=data_frame['close'], window=14)
         
+        print(f'{symbol}: Runtime: {now} Entry: {flag_entry}, Side: {flag_side}, TR: {target}, Sl: {stoploss}, High: {high}, Low: {low}, PosID: {position_id}')
 
         if flag_entry:
             if high >= target or low <= stoploss:
@@ -178,6 +184,8 @@ while True:
                 print("Order_send done, ", result)
                 print(f"Exit Opened position with POSITION_TICKET={result.order}")
                 position_id = 0
+                target = 0
+                stoploss = 0
                 flag_entry = False
 
 
@@ -215,6 +223,8 @@ while True:
                 print("Order_send done, ", result)
                 print(f"Exit Opened position with POSITION_TICKET={result.order}")
                 position_id = 0
+                target = 0
+                stoploss = 0
                 flag_entry = False
                 sleep(1)
             buy_price = mt5.symbol_info_tick(symbol).ask
@@ -290,6 +300,8 @@ while True:
                 print("Order_send done, ", result)
                 print(f"Exit Opened position with POSITION_TICKET={result.order}")
                 position_id = 0
+                target = 0
+                stoploss = 0
                 flag_entry = False
                 sleep(1)
             buy_price = mt5.symbol_info_tick(symbol).ask

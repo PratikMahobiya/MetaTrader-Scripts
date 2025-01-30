@@ -26,11 +26,15 @@ for position in positions:
     if "Call_Daily" == position['comment']:
         position_id = position['ticket']
         flag_side = 'Call'
+        target = position['tp']
+        stoploss = position['sl']
         print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
         break
     elif "Put_Daily" == position['comment']:
         position_id = position['ticket']
         flag_side = 'Put'
+        target = position['sl']
+        stoploss = position['tp']
         print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
         break
 
@@ -96,6 +100,8 @@ while True:
         print("Order_send done, ", result)
         print(f"Exit Opened position with POSITION_TICKET={result.order}")
         position_id = 0
+        target = 0
+        stoploss = 0
 
     elif now.time() < time(hour=23, minute=30) and position_id in [0, '0', None]:
         if close > prev_high:
@@ -176,3 +182,9 @@ while True:
             print(f"Opened Put position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             position_id = result.order
             flag_side = 'Put'
+    
+    elif position_id != 0:
+        if close >= target or close <= stoploss:
+            position_id = 0
+            target = 0
+            stoploss = 0
