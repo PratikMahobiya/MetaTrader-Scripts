@@ -8,6 +8,8 @@ symbol = "USOILm"
 lot = 1.0
 flag_side = 'Call' # By Default
 tr_percent = 0.02
+target = 0
+stoploss = 0
 position_id = 0
 
 # establish connection to MetaTrader 5 terminal
@@ -41,6 +43,26 @@ timezone = pytz.timezone("UTC")
 while True:
     now  = datetime.now(tz=timezone)
 
+    # create 'datetime' object in UTC time zone to avoid the implementation of a local time zone offset
+    utc_from_date = now + timedelta(days=1)
+
+    data_candle = mt5.copy_rates_from(symbol, mt5.TIMEFRAME_D1, utc_from_date, 10)
+    
+    # create DataFrame out of the obtained data
+    data_frame = pd.DataFrame(data_candle)
+    # convert time in seconds into the datetime format
+    data_frame['time']=pd.to_datetime(data_frame['time'], unit='s')
+
+    open = data_frame['open'].iloc[-1]
+    high = data_frame['high'].iloc[-1]
+    low = data_frame['low'].iloc[-1]
+    close = data_frame['close'].iloc[-1]
+    prev_open = data_frame['open'].iloc[-2]
+    prev_high = data_frame['high'].iloc[-2]
+    prev_low = data_frame['low'].iloc[-2]
+    prev_close = data_frame['close'].iloc[-2]
+    max_high = max(data_frame['high'].iloc[-30:-1])
+    min_low = min(data_frame['low'].iloc[-30:-1])
 
     if now.time() > time(hour=23, minute=30) and position_id not in [0, '0', None]:
         price=mt5.symbol_info_tick(symbol).bid
@@ -76,28 +98,6 @@ while True:
         position_id = 0
 
     elif now.time() < time(hour=23, minute=30) and position_id in [0, '0', None]:
-        # create 'datetime' object in UTC time zone to avoid the implementation of a local time zone offset
-        utc_from_date = now + timedelta(days=1)
-
-        data_candle = mt5.copy_rates_from(symbol, mt5.TIMEFRAME_D1, utc_from_date, 10)
-        
-        # create DataFrame out of the obtained data
-        data_frame = pd.DataFrame(data_candle)
-        # convert time in seconds into the datetime format
-        data_frame['time']=pd.to_datetime(data_frame['time'], unit='s')
-
-        open = data_frame['open'].iloc[-1]
-        high = data_frame['high'].iloc[-1]
-        low = data_frame['low'].iloc[-1]
-        close = data_frame['close'].iloc[-1]
-        prev_open = data_frame['open'].iloc[-2]
-        prev_high = data_frame['high'].iloc[-2]
-        prev_low = data_frame['low'].iloc[-2]
-        prev_close = data_frame['close'].iloc[-2]
-        max_high = max(data_frame['high'].iloc[-30:-1])
-        min_low = min(data_frame['low'].iloc[-30:-1])
-
-
         if close > prev_high:
             print(f'Call Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
@@ -176,5 +176,8 @@ while True:
             print(f"Opened Put position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             position_id = result.order
             flag_side = 'Put'
-    else:
-        pass
+    elif position_id != 0:
+        if close >= target or close <= stoploss:
+            position_id = 0
+            target = 0
+            stoploss = 0

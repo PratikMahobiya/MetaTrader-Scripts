@@ -141,7 +141,12 @@ while True:
         
 
         if flag_entry:
-            if (flag_side == 'Call' and rsi.iloc[-2] > 60 and rsi.iloc[-2] > rsi.iloc[-1]) or (flag_side == 'Put' and rsi.iloc[-2] < 40 and rsi.iloc[-2] < rsi.iloc[-1]):
+            if close >= target or close <= stoploss:
+                position_id = 0
+                flag_entry = False
+                target = 0
+                stoploss = 0
+            if (flag_side == 'Call' and ((rsi.iloc[-2] > 60 and rsi.iloc[-2] > rsi.iloc[-1]) or (rsi.iloc[-2] < 30 and rsi.iloc[-1] < 30)) ) or (flag_side == 'Put' and ((rsi.iloc[-2] < 40 and rsi.iloc[-2] < rsi.iloc[-1]) or (rsi.iloc[-2] > 70 and rsi.iloc[-1] > 70)) ):
                 price=mt5.symbol_info_tick(symbol).bid
                 request={
                     "action": mt5.TRADE_ACTION_DEAL,
