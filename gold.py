@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 symbol = "XAUUSDm"
 flag_entry = False
 flag_side = 'Call' # By Default
-tr_percent = 0.02
-sl_percent = 0.01
+tr_percent = 0.015
+sl_percent = 0.005
 buy_price = 0
 stoploss = 0
 target = 0
