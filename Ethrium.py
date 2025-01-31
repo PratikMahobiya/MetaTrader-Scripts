@@ -150,7 +150,7 @@ while True:
         super_trend = SUPER_TREND(high=data_frame['high'], low=data_frame['low'], close=data_frame['close'], length=10, multiplier=3)
         rsi = ta.momentum.rsi(close=data_frame['close'], window=14)
         
-        print(f'{symbol}: Runtime: {now} Entry: {flag_entry}, Side: {flag_side}, TR: {target}, Sl: {stoploss}, High: {high}, Low: {low}, PosID: {position_id}')
+        print(f'{symbol}: Runtime: {now} Entry: {flag_entry}, Side: {flag_side}, TR: {target}, Sl: {stoploss}, Ltp: {close}, PosID: {position_id}')
 
         if flag_entry:
             if (flag_side == 'Call' and ((rsi.iloc[-2] > 60 and rsi.iloc[-2] > rsi.iloc[-1]) or (rsi.iloc[-2] < 30 and rsi.iloc[-1] < 30)) ) or (flag_side == 'Put' and ((rsi.iloc[-2] < 40 and rsi.iloc[-2] < rsi.iloc[-1]) or (rsi.iloc[-2] > 70 and rsi.iloc[-1] > 70)) ):
