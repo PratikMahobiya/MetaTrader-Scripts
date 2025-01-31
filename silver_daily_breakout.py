@@ -145,6 +145,8 @@ while True:
             print(f"Opened Call position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             position_id = result.order
             flag_side = 'Call'
+            target = result.request.tp
+            stoploss = result.request.sl
         
 
         elif close < prev_low:
@@ -185,6 +187,8 @@ while True:
             print(f"Opened Put position with POSITION_TICKET={result.order}, Target: {target}, Stoploss: {stoploss}")
             position_id = result.order
             flag_side = 'Put'
+            target = result.request.sl
+            stoploss = result.request.tp
     
     elif position_id != 0:
         if close >= target or close <= stoploss:
