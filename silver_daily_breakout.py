@@ -5,7 +5,7 @@ import pytz
 
 # Variables
 symbol = "XAGUSDm"
-lot = 0.0017
+lot = 0.0032
 daily_change_entry_limit = 1.5
 flag_side = 'Call' # By Default
 tr_percent = 0.02
