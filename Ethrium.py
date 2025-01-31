@@ -130,6 +130,12 @@ while True:
     data_frame['time']=pd.to_datetime(data_frame['time'], unit='s')
     
     now = data_frame['time'].iloc[-1]
+    if flag_entry:
+        if data_frame['close'].iloc[-1] >= target or data_frame['close'].iloc[-1] <= stoploss:
+            position_id = 0
+            flag_entry = False
+            target = 0
+            stoploss = 0
     if last_minute != now.time().minute:
         last_minute = now.time().minute
         data_frame = data_frame[:-1]
@@ -147,11 +153,6 @@ while True:
         print(f'{symbol}: Runtime: {now} Entry: {flag_entry}, Side: {flag_side}, TR: {target}, Sl: {stoploss}, High: {high}, Low: {low}, PosID: {position_id}')
 
         if flag_entry:
-            if high >= target or low <= stoploss:
-                position_id = 0
-                flag_entry = False
-                target = 0
-                stoploss = 0
             if (flag_side == 'Call' and ((rsi.iloc[-2] > 60 and rsi.iloc[-2] > rsi.iloc[-1]) or (rsi.iloc[-2] < 30 and rsi.iloc[-1] < 30)) ) or (flag_side == 'Put' and ((rsi.iloc[-2] < 40 and rsi.iloc[-2] < rsi.iloc[-1]) or (rsi.iloc[-2] > 70 and rsi.iloc[-1] > 70)) ):
                 price=mt5.symbol_info_tick(symbol).bid
                 request={
