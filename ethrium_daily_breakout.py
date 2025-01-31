@@ -6,6 +6,7 @@ import pytz
 # Variables
 symbol = "ETHUSDm"
 lot = 1.7
+daily_change_entry_limit = 3
 flag_side = 'Call' # By Default
 tr_percent = 0.02
 target = 0
@@ -67,6 +68,8 @@ while True:
     prev_close = data_frame['close'].iloc[-2]
     max_high = max(data_frame['high'].iloc[-30:-1])
     min_low = min(data_frame['low'].iloc[-30:-1])
+    symbol_info = mt5.symbol_info(symbol)._asdict()
+    day_change = abs(symbol_info['price_change'])
 
     if now.time() > time(hour=23, minute=30) and position_id not in [0, '0', None]:
         price=mt5.symbol_info_tick(symbol).bid
@@ -103,7 +106,7 @@ while True:
         target = 0
         stoploss = 0
 
-    elif now.time() < time(hour=23, minute=30) and position_id in [0, '0', None]:
+    elif now.time() < time(hour=23, minute=30) and position_id in [0, '0', None] and day_change < daily_change_entry_limit:
         if close > prev_high:
             print(f'Call Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
