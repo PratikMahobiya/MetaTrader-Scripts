@@ -132,6 +132,7 @@ while True:
     now = data_frame['time'].iloc[-1]
     if flag_entry:
         if data_frame['close'].iloc[-1] >= target or data_frame['close'].iloc[-1] <= stoploss:
+            print(f"Exit: {now} {flag_entry}, Side: {flag_side}, TR: {target}, Sl: {stoploss}, Ltp: {data_frame['close'].iloc[-1]}")
             position_id = 0
             flag_entry = False
             target = 0
@@ -265,6 +266,8 @@ while True:
             flag_entry = True
             flag_side = 'Call'
             position_id = result.order
+            target = result.request.tp
+            stoploss = result.request.sl
         
 
         elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70 and rsi.iloc[-3] < 70:
@@ -342,3 +345,5 @@ while True:
             flag_entry = True
             flag_side = 'Put'
             position_id = result.order
+            target = result.request.sl
+            stoploss = result.request.tp
