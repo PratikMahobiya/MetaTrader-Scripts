@@ -5,7 +5,7 @@ import pytz
 
 # Variables
 symbol = "ETHUSDm"
-lot = 20.0
+lot = 1.7
 flag_side = 'Call' # By Default
 tr_percent = 0.02
 target = 0

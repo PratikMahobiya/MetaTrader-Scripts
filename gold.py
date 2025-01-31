@@ -14,7 +14,7 @@ sl_percent = 0.0025
 buy_price = 0
 stoploss = 0
 target = 0
-lot = 1.0
+lot = 0.01
 position_id = 0
 
 # establish connection to MetaTrader 5 terminal

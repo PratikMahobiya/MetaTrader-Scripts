@@ -5,7 +5,7 @@ import pytz
 
 # Variables
 symbol = "XAUUSDm"
-lot = 1.0
+lot = 0.01
 flag_side = 'Call' # By Default
 tr_percent = 0.02
 target = 0
