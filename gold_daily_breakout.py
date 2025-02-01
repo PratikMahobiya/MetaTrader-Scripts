@@ -6,12 +6,12 @@ import pytz
 # Variables
 symbol = "XAUUSDm"
 lot = 0.02
-daily_change_entry_limit = 1.5
 flag_side = 'Call' # By Default
-tr_percent = 0.02
 target = 0
 stoploss = 0
 position_id = 0
+call_entry_count = 0
+put_entry_count = 0
 
 # establish connection to MetaTrader 5 terminal
 if not mt5.initialize():
@@ -29,18 +29,22 @@ for position in positions:
         flag_side = 'Call'
         target = position['tp']
         stoploss = position['sl']
-        print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
+        call_entry_count += 1
+        print(f"Position: Side: {call_entry_count}-{flag_side}, Position ID: {position_id}")
         break
     elif "Put_Daily" == position['comment']:
         position_id = position['ticket']
         flag_side = 'Put'
         target = position['sl']
         stoploss = position['tp']
-        print(f"Successfully fetched Open Position: Side: {flag_side}, Position ID: {position_id} ..")
+        put_entry_count += 1
+        print(f"Position: Side: {put_entry_count}-{flag_side}, Position ID: {position_id}")
         break
 
 if position_id == 0:
-    print(f"No Open Position Found..")
+    print(f"No Position Found: Call-E-Count: {call_entry_count}, Put-E-Count: {put_entry_count}")
+else:
+    print(f"Position Found: Call-E-Count: {call_entry_count}, Put-E-Count: {put_entry_count}")
 
 # set time zone to UTC
 timezone = pytz.timezone("UTC")
@@ -68,50 +72,58 @@ while True:
     prev_close = data_frame['close'].iloc[-2]
     max_high = max(data_frame['high'].iloc[-30:-1])
     min_low = min(data_frame['low'].iloc[-30:-1])
-    symbol_info = mt5.symbol_info(symbol)._asdict()
-    day_change = abs(symbol_info['price_change'])
+    data_frame['Return'] = 100 * (data_frame['close'].pct_change())
+    daily_volatility = data_frame['Return'].std()
+    tr_percent = round(daily_volatility, 4)/100
 
-    if now.time() > time(hour=23, minute=30) and position_id not in [0, '0', None]:
-        price=mt5.symbol_info_tick(symbol).bid
-        request={
-            "action": mt5.TRADE_ACTION_DEAL,
-            "symbol": symbol,
-            "volume": lot,
-            "type": mt5.ORDER_TYPE_SELL if flag_side == 'Call' else mt5.ORDER_TYPE_BUY,
-            "position": position_id,
-            "price": price,
-            "deviation": 0,
-            "magic": int(datetime.now().strftime("%d%m%Y")),
-            "comment": f"Exit: {flag_side} Daily Breakout",
-            "type_time": mt5.ORDER_TIME_GTC,
-            "type_filling": mt5.ORDER_FILLING_FOK,
-        }
-        # send a trading request
-        result=mt5.order_send(request)
-        # check the execution result
-        if result.retcode != mt5.TRADE_RETCODE_DONE:
-            print("Order_send failed, retcode={}".format(result.retcode))
-            # request the result as a dictionary and display it element by element
-            result_dict=result._asdict()
-            for field in result_dict.keys():
-                print("   {}={}".format(field,result_dict[field]))
-                # if this is a trading request structure, display it element by element as well
-                if field=="request":
-                    traderequest_dict=result_dict[field]._asdict()
-                    for tradereq_filed in traderequest_dict:
-                        print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
-        print("Order_send done, ", result)
-        print(f"Exit Opened position with POSITION_TICKET={result.order}")
-        position_id = 0
-        target = 0
-        stoploss = 0
+    if now.time() > time(hour=23, minute=30):
+        if call_entry_count != 0:
+            print(f"{symbol} Call Entry Count Reset from {call_entry_count} to 0")
+            call_entry_count = 0
+        if put_entry_count != 0:
+            print(f"{symbol} Put Entry Count Reset from {put_entry_count} to 0")
+            put_entry_count = 0
+        if position_id not in [0, '0', None]:
+            price=mt5.symbol_info_tick(symbol).bid
+            request={
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": symbol,
+                "volume": lot,
+                "type": mt5.ORDER_TYPE_SELL if flag_side == 'Call' else mt5.ORDER_TYPE_BUY,
+                "position": position_id,
+                "price": price,
+                "deviation": 0,
+                "magic": int(datetime.now().strftime("%d%m%Y")),
+                "comment": f"Exit: {flag_side} Daily Breakout",
+                "type_time": mt5.ORDER_TIME_GTC,
+                "type_filling": mt5.ORDER_FILLING_FOK,
+            }
+            # send a trading request
+            result=mt5.order_send(request)
+            # check the execution result
+            if result.retcode != mt5.TRADE_RETCODE_DONE:
+                print("Order_send failed, retcode={}".format(result.retcode))
+                # request the result as a dictionary and display it element by element
+                result_dict=result._asdict()
+                for field in result_dict.keys():
+                    print("   {}={}".format(field,result_dict[field]))
+                    # if this is a trading request structure, display it element by element as well
+                    if field=="request":
+                        traderequest_dict=result_dict[field]._asdict()
+                        for tradereq_filed in traderequest_dict:
+                            print("       traderequest: {}={}".format(tradereq_filed,traderequest_dict[tradereq_filed]))
+            print("Order_send done, ", result)
+            print(f"Exit Opened position with POSITION_TICKET={result.order}")
+            position_id = 0
+            target = 0
+            stoploss = 0
 
-    elif now.time() < time(hour=23, minute=30) and position_id in [0, '0', None] and day_change < daily_change_entry_limit:
-        if close > prev_high:
+    elif time(hour=00, minute=5) < now.time() < time(hour=23, minute=30) and position_id in [0, '0', None]:
+        if close > prev_high and call_entry_count == 0:
             print(f'Call Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
             target = buy_price + buy_price*tr_percent
-            stoploss = prev_open
+            stoploss = prev_open if prev_close > prev_open else prev_close
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": symbol,
@@ -147,13 +159,15 @@ while True:
             flag_side = 'Call'
             target = result.request.tp
             stoploss = result.request.sl
+            call_entry_count += 1
+            put_entry_count = 0
         
 
-        elif close < prev_low:
+        elif close < prev_low and put_entry_count == 0:
             print(f'Put Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
             target = buy_price - buy_price*tr_percent
-            stoploss = prev_open
+            stoploss = prev_open if prev_close < prev_open else prev_close
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": symbol,
@@ -189,6 +203,8 @@ while True:
             flag_side = 'Put'
             target = result.request.sl
             stoploss = result.request.tp
+            put_entry_count += 1
+            call_entry_count = 0
     
     elif position_id != 0:
         if close >= target or close <= stoploss:

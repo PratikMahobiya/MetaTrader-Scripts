@@ -4,8 +4,8 @@ import pandas as pd
 import pytz
 
 # Variables
-symbol = "XAGUSDm"
-lot = 0.0032
+symbol = "BTCXAUm"
+lot = 0.027
 flag_side = 'Call' # By Default
 target = 0
 stoploss = 0
