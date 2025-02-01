@@ -76,7 +76,7 @@ while True:
     daily_volatility = data_frame['Return'].std()
     tr_percent = round(daily_volatility, 4)/100
 
-    if now.time() > time(hour=23, minute=30):
+    if (now.date().weekday() != 5 and now.time() > time(hour=22, minute=45)) or (now.date().weekday() == 5 and now.time() > time(hour=21, minute=45)):
         if call_entry_count != 0:
             print(f"{symbol} Call Entry Count Reset from {call_entry_count} to 0")
             call_entry_count = 0
@@ -118,7 +118,7 @@ while True:
             target = 0
             stoploss = 0
 
-    elif time(hour=00, minute=5) < now.time() < time(hour=23, minute=30) and position_id in [0, '0', None]:
+    elif now.date().weekday() not in [5, 6] and  time(hour=00, minute=5) < now.time() < time(hour=23, minute=30) and position_id in [0, '0', None]:
         if close > prev_high and call_entry_count == 0:
             print(f'Call Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
