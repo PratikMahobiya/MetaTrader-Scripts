@@ -74,7 +74,8 @@ while True:
     min_low = min(data_frame['low'].iloc[-30:-1])
     data_frame['Return'] = 100 * (data_frame['close'].pct_change())
     daily_volatility = data_frame['Return'].std()
-    tr_percent = round(daily_volatility, 4)/100
+    tr_percent = round(daily_volatility, 4)/100 if daily_volatility < 3 else 0.03
+    sl_percent = 0.01
 
     if now.time() > time(hour=23, minute=30):
         if call_entry_count != 0:
@@ -123,7 +124,7 @@ while True:
             print(f'Call Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
             target = buy_price + buy_price*tr_percent
-            stoploss = prev_open if prev_close > prev_open else prev_close
+            stoploss = buy_price - buy_price*sl_percent # prev_open if prev_close > prev_open else prev_close
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": symbol,
@@ -167,7 +168,7 @@ while True:
             print(f'Put Order: {symbol}')
             buy_price = mt5.symbol_info_tick(symbol).ask
             target = buy_price - buy_price*tr_percent
-            stoploss = prev_open if prev_close < prev_open else prev_close
+            stoploss = buy_price + buy_price*sl_percent # prev_open if prev_close < prev_open else prev_close
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": symbol,
