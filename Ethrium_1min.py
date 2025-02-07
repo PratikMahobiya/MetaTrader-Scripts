@@ -6,7 +6,7 @@ import MetaTrader5 as mt5
 from datetime import datetime, timedelta
 
 # Variables
-symbol = "XAUUSDm"
+symbol = "ETHUSDm"
 flag_entry = False
 flag_side = 'Call' # By Default
 tr_percent = 0.0075
@@ -14,7 +14,7 @@ sl_percent = 0.0025
 buy_price = 0
 stoploss = 0
 target = 0
-lot = 0.01
+lot = 1.7
 position_id = 0
 
 # establish connection to MetaTrader 5 terminal
@@ -191,7 +191,7 @@ while True:
                 flag_entry = False
 
 
-        elif flag_entry == False and rsi.iloc[-1] > 30 and rsi.iloc[-2] < 30 and rsi.iloc[-3] > 30:
+        elif flag_entry == False and rsi.iloc[-1] > 30 and rsi.iloc[-2] < 30: # and rsi.iloc[-3] > 30:
             print(f'Call Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
@@ -270,7 +270,7 @@ while True:
             stoploss = result.request.sl
         
 
-        elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70 and rsi.iloc[-3] < 70:
+        elif flag_entry == False and rsi.iloc[-1] < 70 and rsi.iloc[-2] > 70: # and rsi.iloc[-3] < 70:
             print(f'Put Order: {symbol}')
             if position_id != 0:
                 price=mt5.symbol_info_tick(symbol).bid
