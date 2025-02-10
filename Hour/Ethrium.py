@@ -120,7 +120,7 @@ while True:
     elif 0 < now.time().minute < 55 and position_id in [0, '0', None]:
         if close > prev_high and call_entry_count == 0 and put_entry_count == 0:
             print(f'Call Order: {symbol}')
-            buy_price = mt5.symbol_info_tick(symbol).ask
+            buy_price = prev_high
             target = buy_price + buy_price*tr_percent
             stoploss = buy_price - buy_price*sl_percent # prev_open if prev_close > prev_open else prev_close
             request = {
@@ -164,7 +164,7 @@ while True:
 
         elif close < prev_low and call_entry_count == 0 and put_entry_count == 0:
             print(f'Put Order: {symbol}')
-            buy_price = mt5.symbol_info_tick(symbol).ask
+            buy_price = prev_low
             target = buy_price - buy_price*tr_percent
             stoploss = buy_price + buy_price*sl_percent # prev_open if prev_close < prev_open else prev_close
             request = {
