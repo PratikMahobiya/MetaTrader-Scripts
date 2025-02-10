@@ -5,12 +5,12 @@ import pytz
 
 # Variables
 symbol = "XAGUSDm"
-lot = 0.0032
+lot = 0.003
 flag_side = 'Call' # By Default
 target = 0
 stoploss = 0
 position_id = 0
-call_entry_count = 0
+call_entry_count = 1
 put_entry_count = 0
 
 # establish connection to MetaTrader 5 terminal
@@ -74,7 +74,7 @@ while True:
     min_low = min(data_frame['low'].iloc[-30:-1])
     data_frame['Return'] = 100 * (data_frame['close'].pct_change())
     daily_volatility = data_frame['Return'].std()
-    tr_percent = round(daily_volatility, 4)/100 if daily_volatility < 3 else 0.03
+    tr_percent = round(daily_volatility, 4)/100 if daily_volatility < 1.5 else 0.015
     sl_percent = 0.01
 
     if (now.date().weekday() != 5 and now.time() > time(hour=22, minute=45)) or (now.date().weekday() == 5 and now.time() > time(hour=21, minute=45)):
@@ -126,10 +126,10 @@ while True:
             target = buy_price + buy_price*tr_percent
             stoploss = buy_price - buy_price*sl_percent # prev_open if prev_close > prev_open else prev_close
             request = {
-                "action": mt5.TRADE_ACTION_DEAL,
+                "action": mt5.TRADE_ACTION_PENDING,
                 "symbol": symbol,
                 "volume": lot,
-                "type": mt5.ORDER_TYPE_BUY,
+                "type": mt5.ORDER_TYPE_BUY_LIMIT,
                 "price": buy_price,
                 "sl": stoploss,
                 "tp": target,
@@ -170,10 +170,10 @@ while True:
             target = buy_price - buy_price*tr_percent
             stoploss = buy_price + buy_price*sl_percent # prev_open if prev_close < prev_open else prev_close
             request = {
-                "action": mt5.TRADE_ACTION_DEAL,
+                "action": mt5.TRADE_ACTION_PENDING,
                 "symbol": symbol,
                 "volume": lot,
-                "type": mt5.ORDER_TYPE_SELL,
+                "type": mt5.ORDER_TYPE_SELL_LIMIT,
                 "price": buy_price,
                 "sl": stoploss,
                 "tp": target,
